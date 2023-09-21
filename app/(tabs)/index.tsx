@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
-// Load your JSON data from allPlayersDataFinal.json
+// Load  JSON data from allPlayersDataFinal.json
 import allPlayersData from "../../allPlayersDataFinalModified.json";
 
 const screenWidth = Dimensions.get("window").width;
@@ -48,38 +48,9 @@ const playerNames = Array.from(
 // Shuffle player names randomly
 const shuffledPlayerNames = shuffleArray(playerNames);
 
-// Create an object to store information about players using their names as keys
-// const playersInfo = {};
-
-// // Fill the playersInfo object with information about players
-// shuffledPlayerNames.forEach((name) => {
-//   const player = allPlayersData.players.find((player) => player.name === name);
-//   if (player) {
-//     playersInfo[name] = {
-//       season: player.season,
-//       team: player.team,
-//     };
-//   }
-// });
-
 // Assign shuffled player names as labels for rows and columns
 let rowLabels = shuffledPlayerNames.slice(0, 3);
 let columnLabels = shuffledPlayerNames.slice(3, 6); // Use the next 3 names for columns
-
-// const handleShuffleLabels = () => {
-//   // Shuffle player names randomly
-//   const shuffledPlayerNames = Array.from(
-//     new Set(allPlayersData.players.map((player) => player.name))
-//   );
-
-//   // Assign shuffled player names as labels for rows and columns
-//   rowLabels = shuffledPlayerNames.slice(0, 3);
-//   columnLabels = shuffledPlayerNames.slice(3, 6);
-
-//   // Update the state with the new labels
-//   // setRowLabels(newRowLabels);
-//   // setColumnLabels(newColumnLabels);
-// };
 
 export default function TabOneScreen() {
   const [cellContents, setCellContents] = useState(Array(9).fill(""));
@@ -190,13 +161,6 @@ export default function TabOneScreen() {
     setActiveIndex(-1);
   };
 
-  const handleCellChange = (index: number, text: string) => {
-    // const updatedContents = [...cellContents];
-    // updatedContents[index] = text;
-    // setCellContents(updatedContents);
-    // console.log(`Text entered in Cell ${index + 1}:`, text);
-  };
-
   const handlePlayerSelect = (index, player) => {
     const rowIndex = Math.floor(index / 3); // Assuming there are 3 cells in each row
     const columnIndex = index % 3; // Assuming there are 3 cells in each column
@@ -205,7 +169,7 @@ export default function TabOneScreen() {
     const selectedRowName = rowLabels[rowIndex];
     const selectedColumnName = columnLabels[columnIndex];
 
-    // Now you have the row and column index, which you can use as needed
+    // Now we have the row and column index, which we can use as needed
     console.log(
       `Selected cell: Row ${selectedRowName}, Column ${selectedColumnName}`
     );
@@ -221,18 +185,10 @@ export default function TabOneScreen() {
         );
       }
     });
-
-    // You can update cellContents or any other state as needed
   };
 
   return (
     <View style={styles.container}>
-      {/* <TouchableOpacity
-        style={styles.shuffleButton}
-        onPress={handleShuffleLabels}
-      >
-        <Text style={styles.shuffleButtonText}>Shuffle Labels</Text>
-      </TouchableOpacity> */}
       <View style={styles.columnLabels}>
         <View style={styles.labelContainer}>
           <Text style={styles.label}></Text>
@@ -359,9 +315,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-// const players = [
-//   { name: "Alexander Ovechkin", team: "Washington", season: 2008 },
-//   { name: "Jonathan Quick", team: "Los Angeles", season: 2008 },
-//   { name: "Connor McDavid", team: "New York", season: 2008 },
-// ];
