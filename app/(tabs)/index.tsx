@@ -94,13 +94,6 @@ export default function TabOneScreen() {
         style={styles.gridCell}
         onPress={() => handleCellPress(index)}
       >
-        {/* <TextInput
-          //value={cellContents[index]}
-          onChangeText={(text) => handleSearch(index, text)}
-          style={styles.gridCellInput}
-          placeholder={""}
-          placeholderTextColor="#aaa"
-        /> */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -253,6 +246,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   gridCell: {
+    width: screenWidth * 0.2,
+    height: screenWidth * 0.2,
+    backgroundColor: "#00FF00",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 2,
+    borderWidth: 2,
+    borderColor: "#2980b9",
+  },
+  gridCellCorrect: {
     width: screenWidth * 0.2,
     height: screenWidth * 0.2,
     backgroundColor: "#3498db",
