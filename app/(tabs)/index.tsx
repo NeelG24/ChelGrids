@@ -48,9 +48,23 @@ const playerNames = Array.from(
 // Shuffle player names randomly
 const shuffledPlayerNames = shuffleArray(playerNames);
 
+// Filter players who have played for at least two seasons
+const eligiblePlayers = shuffledPlayerNames.filter((name) => {
+  const seasonsPlayed = new Set();
+  allPlayersData.players.forEach((playerData) => {
+    if (playerData.name === name) {
+      seasonsPlayed.add(playerData.season);
+    }
+  });
+  return seasonsPlayed.size >= 10;
+});
+
 // Assign shuffled player names as labels for rows and columns
-let rowLabels = shuffledPlayerNames.slice(0, 3);
-let columnLabels = shuffledPlayerNames.slice(3, 6); // Use the next 3 names for columns
+// let rowLabels = eligiblePlayers.slice(0, 3);
+// let columnLabels = eligiblePlayers.slice(3, 6); // Use the next 3 names for columns
+
+let rowLabels = ["Connor McDavid", ...eligiblePlayers.slice(1, 3)];
+let columnLabels = ["Leon Draisaitl", ...eligiblePlayers.slice(4, 6)]; // Use the next 3 names for columns
 
 export default function TabOneScreen() {
   const [cellContents, setCellContents] = useState(Array(9).fill(""));
@@ -58,6 +72,31 @@ export default function TabOneScreen() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [searchTerm, setSearchTerm] = useState(""); // Add searchTerm state
   const [searchResults, setSearchResults] = useState({}); // Add searchResults state
+  const [cellCorrectness, setCellCorrectness] = useState(Array(9).fill(false));
+  const [score, setScore] = useState(20); // Initialize the score
+
+  // Reset function to reset the game state and shuffle labels
+  const handleReset = () => {
+    // Shuffle player names again to get new labels
+    const shuffledPlayerNames = shuffleArray(playerNames);
+
+    // Update rowLabels and columnLabels with new shuffled labels
+    const newRowLabels = ["Connor McDavid", ...shuffledPlayerNames.slice(1, 3)];
+    const newColumnLabels = [
+      "Leon Draisaitl",
+      ...shuffledPlayerNames.slice(4, 6),
+    ];
+
+    // Reset the game state
+    setScore(20);
+    setCellContents(Array(9).fill(""));
+    setCellCorrectness(Array(9).fill(false));
+    setModalVisible(Array(9).fill(false));
+
+    // Update the label state with the new shuffled labels
+    rowLabels = newRowLabels;
+    columnLabels = newColumnLabels;
+  };
 
   const handleSearch = (index, text) => {
     // Update the cellContents state
@@ -91,7 +130,10 @@ export default function TabOneScreen() {
     return (
       <TouchableOpacity
         key={index}
-        style={styles.gridCell}
+        style={[
+          styles.gridCell,
+          cellCorrectness[index] ? styles.gridCellCorrect : null,
+        ]}
         onPress={() => handleCellPress(index)}
       >
         <Modal
@@ -141,6 +183,11 @@ export default function TabOneScreen() {
   };
 
   const handleCellPress = (index: number) => {
+    // Check if the cell is already correct, and if so, prevent opening the modal
+    if (cellCorrectness[index]) {
+      return;
+    }
+
     setModalVisible((prev) =>
       prev.map((visible, i) => (i === index ? !visible : visible))
     );
@@ -168,20 +215,86 @@ export default function TabOneScreen() {
     );
 
     const playerName = player.name;
+    let dataBank = {};
+
+    // Initialize the arrays with the player names as keys
+    dataBank[playerName] = [];
+    dataBank[selectedRowName] = [];
+    dataBank[selectedColumnName] = [];
 
     // Iterate through all players in the JSON data
     allPlayersData.players.forEach((playerData) => {
       if (playerData.name === playerName) {
-        // Log the player's name, year, and team
-        console.log(
-          `Player Name: ${playerData.name}, Season: ${playerData.season}, Team: ${playerData.team}`
-        );
+        dataBank[playerName].push({
+          season: playerData.season,
+          team: playerData.team,
+        });
       }
+      if (playerData.name === selectedRowName) {
+        dataBank[selectedRowName].push({
+          season: playerData.season,
+          team: playerData.team,
+        });
+      }
+      if (playerData.name === selectedColumnName) {
+        dataBank[selectedColumnName].push({
+          season: playerData.season,
+          team: playerData.team,
+        });
+      }
+    });
+
+    console.log(dataBank);
+
+    // Check if playerName played for the same team in the same season as selectedRowName
+    const playerSeasons = dataBank[playerName];
+    const rowPlayerSeasons = dataBank[selectedRowName];
+    const columnPlayerSeasons = dataBank[selectedColumnName];
+
+    const playedWithRowPlayer = playerSeasons.some((playerSeason) =>
+      rowPlayerSeasons.some(
+        (rowSeason) =>
+          rowSeason.season === playerSeason.season &&
+          rowSeason.team === playerSeason.team
+      )
+    );
+
+    const playedWithColumnPlayer = playerSeasons.some((playerSeason) =>
+      columnPlayerSeasons.some(
+        (columnSeason) =>
+          columnSeason.season === playerSeason.season &&
+          columnSeason.team === playerSeason.team
+      )
+    );
+
+    const havePlayedTogether = playedWithRowPlayer && playedWithColumnPlayer;
+
+    console.log(`Players have played together: ${havePlayedTogether}`);
+
+    // Deduct one point from the score for a false guess
+    if (!havePlayedTogether) {
+      setScore(score - 1);
+    }
+
+    // Update cell correctness based on the guess
+    setCellCorrectness((prevCorrectness) => {
+      const newCorrectness = [...prevCorrectness];
+      newCorrectness[index] = havePlayedTogether;
+      return newCorrectness;
     });
   };
 
   return (
     <View style={styles.container}>
+      {/* Display the score above the entire grid */}
+      <View style={styles.scoreContainer}>
+        <Text style={styles.score}>Score: {score}</Text>
+      </View>
+
+      {/* Reset Button */}
+      <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
+        <Text style={styles.resetButtonText}>Reset</Text>
+      </TouchableOpacity>
       <View style={styles.columnLabels}>
         <View style={styles.labelContainer}>
           <Text style={styles.label}></Text>
@@ -248,7 +361,7 @@ const styles = StyleSheet.create({
   gridCell: {
     width: screenWidth * 0.2,
     height: screenWidth * 0.2,
-    backgroundColor: "#00FF00",
+    backgroundColor: "#3498db",
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -259,7 +372,7 @@ const styles = StyleSheet.create({
   gridCellCorrect: {
     width: screenWidth * 0.2,
     height: screenWidth * 0.2,
-    backgroundColor: "#3498db",
+    backgroundColor: "#00FF00",
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -314,6 +427,45 @@ const styles = StyleSheet.create({
     marginBottom: 100,
   },
   shuffleButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  // Add a new style for the score container
+  scoreContainer: {
+    position: "absolute",
+    top: 0, // Position at the top
+    right: 0, // Position at the left
+    backgroundColor: "#3498db", // Choose a color for the reset button
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+
+  score: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    paddingVertical: 2,
+    paddingHorizontal: 2,
+    borderRadius: 4,
+  },
+
+  // Style for the reset button container
+  resetButton: {
+    position: "absolute",
+    top: 0, // Position at the top
+    left: 0, // Position at the left
+    backgroundColor: "#e74c3c", // Choose a color for the reset button
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+
+  // Style for the reset button text
+  resetButtonText: {
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",

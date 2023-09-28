@@ -24,6 +24,13 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
+        name="registrationScreen"
+        options={{
+          title: "Registration Screen",
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
           title: "Chel Grids",
