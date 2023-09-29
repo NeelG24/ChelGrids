@@ -17,7 +17,11 @@ export default function ModalScreen() {
         For testing sake, I have made the first row and column labels Connor and
         Leon, just to provide a freebie and demonstrate correct answer
         functionality - Zack Hyman is one of the many correct answers for the
-        first cell in case you were wondering. Swipe down to close.
+        first cell in case you were wondering. Also, I have left the game on
+        "easy mode", in that only players that have 10 or more registered
+        seasons in the NHL will appear as row and column labels. Both the
+        freebies and "easy mode" can be very simply altered in the code. The
+        data begins at 2008. Swipe down to close.
       </Text>
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
